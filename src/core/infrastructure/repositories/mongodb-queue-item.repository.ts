@@ -41,7 +41,8 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
 
   public async next(
     timestamp: number,
-    type: string
+    type: string,
+    lockedUntilDuration: number
   ): Promise<QueueItem | null> {
     const collection: mongoDb.Collection = this.db.collection('queue-items');
 
@@ -52,7 +53,7 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
       },
       {
         $set: {
-          lockedUntil: new Date().getTime() + 60 * 1000,
+          lockedUntil: new Date().getTime() + lockedUntilDuration,
           updatedAt: new Date().getTime(),
         },
       }

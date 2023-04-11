@@ -8,5 +8,9 @@ export interface QueueItemRepository {
     parameters: { [key: string]: string }
   ): Promise<QueueItem>;
 
-  next(timestamp: number, type: string): Promise<QueueItem | null>;
+  next(
+    timestamp: number,
+    type: string,
+    lockedUntilDuration: number
+  ): Promise<QueueItem | null>;
 }
