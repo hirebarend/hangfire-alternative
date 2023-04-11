@@ -16,7 +16,8 @@ import { MongoDbQueueItemRepository } from './core/infrastructure/repositories/m
   while (true) {
     const queueItem = await queueItemRepository.next(
       new Date().getTime(),
-      'test'
+      'test',
+      60 * 1000
     );
 
     console.log(queueItem);
