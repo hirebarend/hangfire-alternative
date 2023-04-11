@@ -14,6 +14,12 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
       throw new Error();
     }
 
+    this.db.collection('queue-items-archive').insertOne({
+      id: (document.value as unknown as QueueItem).id,
+      parameters: (document.value as unknown as QueueItem).parameters,
+      type: (document.value as unknown as QueueItem).type,
+    });
+
     return document.value as unknown as QueueItem;
   }
 
