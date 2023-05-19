@@ -8,6 +8,10 @@ export interface QueueItemRepository {
     parameters: { [key: string]: string }
   ): Promise<QueueItem>;
 
+  createMany(
+    arr: Array<{ type: string; parameters: { [key: string]: string } }>
+  ): Promise<Array<QueueItem>>;
+
   next(
     timestamp: number,
     type: string,

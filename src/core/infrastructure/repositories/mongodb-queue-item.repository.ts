@@ -45,6 +45,27 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
     return queueItem;
   }
 
+  public async createMany(
+    arr: Array<{ type: string; parameters: { [key: string]: string } }>
+  ): Promise<Array<QueueItem>> {
+    const queueItems = arr.map((x) => {
+      return {
+        createdAt: new Date().getTime(),
+        id: uuid.v4(),
+        lockedUntil: new Date().getTime(),
+        parameters: x.parameters,
+        type: x.type,
+        updatedAt: new Date().getTime(),
+      };
+    });
+
+    const collection: mongoDb.Collection = this.db.collection('queue-items');
+
+    await collection.insertMany(queueItems);
+
+    return queueItems;
+  }
+
   public async next(
     timestamp: number,
     type: string,
