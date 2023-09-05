@@ -6,21 +6,21 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
   constructor(protected db: mongoDb.Db) {}
 
   public async acknowledge(id: string): Promise<QueueItem> {
-    const collection: mongoDb.Collection = this.db.collection('queue-items');
+    const collection: mongoDb.Collection<QueueItem> = this.db.collection<QueueItem>('queue-items');
 
     const document = await collection.findOneAndDelete({ id });
 
-    if (!document.value) {
+    if (!document) {
       throw new Error();
     }
 
     this.db.collection('queue-items-archive').insertOne({
-      id: (document.value as unknown as QueueItem).id,
-      parameters: (document.value as unknown as QueueItem).parameters,
-      type: (document.value as unknown as QueueItem).type,
+      id: document.id,
+      parameters: document.parameters,
+      type: document.type,
     });
 
-    return document.value as unknown as QueueItem;
+    return document;
   }
 
   public async create(
@@ -36,7 +36,7 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
       updatedAt: new Date().getTime(),
     };
 
-    const collection: mongoDb.Collection = this.db.collection('queue-items');
+    const collection: mongoDb.Collection<QueueItem> = this.db.collection<QueueItem>('queue-items');
 
     await collection.insertOne({
       ...queueItem,
@@ -71,9 +71,9 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
     type: string,
     lockedUntilDuration: number
   ): Promise<QueueItem | null> {
-    const collection: mongoDb.Collection = this.db.collection('queue-items');
+    const collection: mongoDb.Collection<QueueItem> = this.db.collection<QueueItem>('queue-items');
 
-    const modifyResult = await collection.findOneAndUpdate(
+    const document = await collection.findOneAndUpdate(
       {
         lockedUntil: { $lte: timestamp },
         type,
@@ -86,10 +86,10 @@ export class MongoDbQueueItemRepository implements QueueItemRepository {
       }
     );
 
-    if (!modifyResult.value) {
+    if (!document) {
       return null;
     }
 
-    return modifyResult.value as unknown as QueueItem;
+    return document;
   }
 }
